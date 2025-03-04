@@ -1,0 +1,325 @@
+package vezbaa;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
+import java.time.Duration;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
+
+public class mystoredemoimplicitWait {
+	WebDriver driver;
+	Actions actions;
+	WebDriverWait wait;
+
+	@BeforeTest
+	public void initalization() {
+		driver = new ChromeDriver();
+		driver.manage().window().maximize();
+		driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+		wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+	}
+
+	@AfterTest
+	public void closeDriver() {
+		driver.quit();
+	}
+
+	@BeforeMethod
+	public void navigation() {
+		driver.navigate().to("https://www.mystoredemo.io/#/");
+		driver.navigate().refresh();
+	}
+
+	@Test
+	public void iconShoppingCart() {
+		// prikazuje ikonu korpu
+		// WebElement cartShopping = driver.findElement(By.cssSelector(".shopping-cart >
+		// a"));
+		WebElement cartShopping = wait
+				.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".shopping-cart > a")));
+		// nakon klika otvara se druga stranica
+		cartShopping.click();
+
+		// prikazuje poruku "Your cart is empty."
+		// WebElement showParagraph =
+		// driver.findElement(By.cssSelector(".cart.cart--empty > p"));
+		WebElement showParagraph = wait
+				.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".cart.cart--empty > p")));
+		Actions actions = new Actions(driver);
+		actions.moveToElement(showParagraph).click().perform();
+		assertTrue(showParagraph.isDisplayed());
+
+		// kliknuti na dugme da se vrati na prvu stranicu "Return Home"
+		// WebElement clickButtonReturnHome =
+		// driver.findElement(By.xpath("/html/body/div[1]/main/section/a"));
+		WebElement clickButtonReturnHome = wait
+				.until(ExpectedConditions.elementToBeClickable(By.xpath("/html/body/div[1]/main/section/a")));
+		clickButtonReturnHome.click();
+
+		// kliknuti ikonu korpu da bi se vratili u stranici "cart"
+		cartShopping.click();
+		// kliknuti na logo "MyStore" vraca nazad u prodaji
+		// WebElement logoMyStore =
+		// driver.findElement(By.xpath("/html/body/div[1]/header/div/a"));
+		WebElement logoMyStore = wait
+				.until(ExpectedConditions.elementToBeClickable(By.xpath("/html/body/div[1]/header/div/a")));
+		logoMyStore.click();
+	}
+
+	@Test
+	public void clickFirstSection() {
+		// WebElement firstSection =
+		// driver.findElement(By.xpath("/html/body/div[1]/main/section/ul/li[1]/a"));
+		WebElement firstSection = wait
+				.until(ExpectedConditions.elementToBeClickable(By.xpath("/html/body/div[1]/main/section/ul/li[1]/a")));
+		firstSection.click();
+
+		// Provera naslova h1
+		// WebElement verifyHeader = driver.findElement(By.cssSelector(".product-detail
+		// .product-detail__title:nth-child(1)"));
+		WebElement verifyHeader = wait.until(ExpectedConditions
+				.visibilityOfElementLocated(By.cssSelector(".product-detail .product-detail__title:nth-child(1)")));
+		assertTrue(verifyHeader.isDisplayed());
+
+		// Verifikovati da li su zvezdice vidljive
+		// WebElement rating =
+		// driver.findElement(By.cssSelector(".product-detail__rating"));
+		// assertTrue(rating.isDisplayed());
+		WebElement rating = wait
+				.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".product-detail__rating")));
+		if (rating.isDisplayed()) {
+			assertTrue(rating.isDisplayed(), "Zvezdice su vidljivi");
+		} else {
+			assertTrue(rating.isEnabled(), "Zvezdice nisu vidljvi");
+		}
+
+		// Verifikovati cenu proizvoda
+		// WebElement textPrice =
+		// driver.findElement(By.xpath("/html/body/div[1]/main/div/section[1]/div[2]/p[1]"));
+		WebElement textPrice = wait.until(ExpectedConditions
+				.visibilityOfElementLocated(By.xpath("/html/body/div[1]/main/div/section[1]/div[2]/p[1]")));
+		assertTrue(textPrice.isDisplayed());
+
+		// Verifikovati text proizvoda
+		// WebElement textProizvoda =
+		// driver.findElement(By.cssSelector(".product-detail__description"));
+		WebElement textProizvoda = wait
+				.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".product-detail__description")));
+		String actualText = textProizvoda.getText();
+		String expectedText = "Pop that collar! ";
+		assertTrue(actualText.contains(expectedText), "Nije dobar tekst");
+
+		// kliknuti dugme "Add to cart"
+		// WebElement clickButtonAddToCart =
+		// driver.findElement(By.xpath("/html/body/div[1]/main/div/section[1]/div[2]/button"));
+		WebElement clickButtonAddToCart = wait.until(ExpectedConditions
+				.elementToBeClickable(By.xpath("/html/body/div[1]/main/div/section[1]/div[2]/button")));
+		clickButtonAddToCart.click();
+
+		// Pronadji toast notifikaciju
+		// WebElement toast = driver.findElement(By.cssSelector(".toast.toast--info"));
+		WebElement toast = wait
+				.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".toast.toast--info")));
+		// proveriti da li je toast skriven
+		if (!toast.getAttribute("class").contains("toast--hidden")) {
+			System.out.println("Toast je vidljiv");
+
+			Actions actions = new Actions(driver);
+			actions.moveToElement(toast).click().perform();
+
+			System.out.println("Kliknuto na toast");
+		} else {
+			System.out.println("Toast je skriven");
+		}
+
+		// Pronadji notifikaciju na ikonici korpe
+		// WebElement cartNotification =
+		// driver.findElement(By.cssSelector(".shopping-cart__notifications"));
+		WebElement cartNotification = wait
+				.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".shopping-cart__notifications")));
+		// dohvatiti broj iz notifikacije
+		String notificationText = cartNotification.getText();
+		System.out.println("Broj proizvoda u korpi: " + notificationText);
+
+		// prikazuje ikonu korpu
+		// WebElement cartShopping = driver.findElement(By.cssSelector(".shopping-cart >
+		// a"));
+		WebElement cartShopping = wait
+				.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".shopping-cart > a")));
+		// nakon klika otvara se druga stranica
+		cartShopping.click();
+
+		// Verifikacija podnaslova "Cart"
+		// WebElement cartText =
+		// driver.findElement(By.xpath("/html/body/div[1]/main/section/h2"));
+		WebElement cartText = wait
+				.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("/html/body/div[1]/main/section/h2")));
+		String actualCartText = cartText.getText();
+		String expectedCartText = "Cart";
+		assertEquals(actualCartText, expectedCartText);
+
+		// Verifikovati da li je Roba vidljiva
+		// WebElement orderSummary =
+		// driver.findElement(By.cssSelector(".order-summary__list__list-item"));
+		WebElement orderSummary = wait.until(
+				ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".order-summary__list__list-item")));
+		assertTrue(orderSummary.isDisplayed());
+
+		// Kliknuti dugme "Kanta za smece"
+		// WebElement trashButton =
+		// driver.findElement(By.xpath("/html/body/div[1]/main/section/div[1]/ul/li/button"));
+		WebElement trashButton = wait.until(ExpectedConditions
+				.elementToBeClickable(By.xpath("/html/body/div[1]/main/section/div[1]/ul/li/button")));
+		trashButton.click();
+
+		// kliknuti na dugme da se vrati na prvu stranicu "Return Home"
+		// WebElement clickButtonReturnHome =
+		// driver.findElement(By.xpath("/html/body/div[1]/main/section/a"));
+		WebElement clickButtonReturnHome = wait
+				.until(ExpectedConditions.elementToBeClickable(By.xpath("/html/body/div[1]/main/section/a")));
+		clickButtonReturnHome.click();
+
+		// **Ponovo pronađi element pre nego što klikneš drugi put**
+		// firstSection =
+		// driver.findElement(By.xpath("/html/body/div[1]/main/section/ul/li[1]/a"));
+		firstSection = wait
+				.until(ExpectedConditions.elementToBeClickable(By.xpath("/html/body/div[1]/main/section/ul/li[1]/a")));
+		firstSection.click();
+
+		// **Ponovo pronađi dugme Add to Cart**
+		// clickButtonAddToCart =
+		// driver.findElement(By.xpath("/html/body/div[1]/main/div/section[1]/div[2]/button"));
+		clickButtonAddToCart = wait.until(ExpectedConditions
+				.elementToBeClickable(By.xpath("/html/body/div[1]/main/div/section[1]/div[2]/button")));
+		clickButtonAddToCart.click();
+
+		// **Ponovo pronađi ikonu korpe**
+		// cartShopping = driver.findElement(By.cssSelector(".shopping-cart > a"));
+		cartShopping = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".shopping-cart > a")));
+		cartShopping.click();
+
+		// Verifikovati da li je mala cena vidljiva
+		// WebElement orderSummerListItemPrice =
+		// driver.findElement(By.cssSelector(".order-summary__list__list-item__price"));
+		WebElement orderSummerListItemPrice = wait.until(ExpectedConditions
+				.visibilityOfElementLocated(By.cssSelector(".order-summary__list__list-item__price")));
+		String actualListItemPrice = orderSummerListItemPrice.getText();
+		String expectedListItemPrice = "€24.99";
+		assertEquals(actualListItemPrice, expectedListItemPrice);
+
+		// verifikovati text "Totla"
+		// WebElement totalText =
+		// driver.findElement(By.xpath("/html/body/div[1]/main/section/div[2]/span[1]"));
+		WebElement totalText = wait.until(ExpectedConditions
+				.visibilityOfElementLocated(By.xpath("/html/body/div[1]/main/section/div[2]/span[1]")));
+		String actualTotalText = totalText.getText();
+		String expectedTotalText = "Total:";
+		assertEquals(actualTotalText, expectedTotalText);
+
+		// verifikovati da je TotalText cena vidljiva
+		// WebElement cenaTotalText =
+		// driver.findElement(By.xpath("/html/body/div[1]/main/section/div[2]/span[2]"));
+		WebElement cenaTotalText = wait.until(ExpectedConditions
+				.visibilityOfElementLocated(By.xpath("/html/body/div[1]/main/section/div[2]/span[2]")));
+		String actualCenaTotalText = cenaTotalText.getText();
+		String expectedCenaTotalText = "R$112.45";
+		assertEquals(actualTotalText, expectedTotalText);
+
+		// toogle
+		// pronalazak toggle
+		// WebElement ctpToggle = driver.findElement(By.cssSelector(".ctp-toggle"));
+		WebElement ctpToggle = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".ctp-toggle")));
+		assertNotNull(ctpToggle, "Toggle nije pronadjen!");
+
+		// proveriti da li postoji checkbox i kliktanje ako nije oznacen
+		// WebElement checkbox = driver.findElement(By.cssSelector("#field-checkbox"));
+		WebElement checkbox = wait
+				.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#field-checkbox")));
+		assertNotNull(checkbox, "Checkbox nije pronadjen");
+		if (!checkbox.isSelected()) {
+			checkbox.click();
+		}
+
+		// verifikovati da li postoji slika
+		// WebElement imageLogo = driver.findElement(By.tagName("img"));
+		WebElement imageLogo = wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("img")));
+		assertNotNull(imageLogo, "Slika nije pronadjena!");
+
+		// verifikovati text unutra span-a
+		// WebElement spantext =
+		// driver.findElement(By.cssSelector(".ctp-toggle__checkbox span"));
+		WebElement spantext = wait
+				.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".ctp-toggle__checkbox span")));
+		String actualSpanText = spantext.getText();
+		String expectedSpanText = "I want to have Click to Pay as a payment method option";
+		assertEquals(actualSpanText, expectedSpanText, "Tekt u span-u ne odgovara!");
+
+		// provera postojanja email-a
+		// WebElement emailContainer =
+		// driver.findElement(By.cssSelector(".ctp-toggle__email"));
+		WebElement emailContainer = wait
+				.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".ctp-toggle__email")));
+		assertNotNull(emailContainer, "Email sekcija nije pronadjena");
+
+		// provera tekst emaila u label
+		// WebElement emailLabel =
+		// driver.findElement(By.cssSelector("label[for='field-email']"));
+		WebElement emailLabel = wait
+				.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("label[for='field-email']")));
+		assertNotNull(emailLabel, "Label za email nije pronadjena!");
+
+		// provera teksta pored inputField emaila
+		// WebElement emailTextLabel =
+		// driver.findElement(By.cssSelector(".ctp-toggle__email-label"));
+		WebElement emailTextLabel = wait
+				.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".ctp-toggle__email-label")));
+		String actualEmailLabel = emailTextLabel.getText();
+		String expectedEmailLabel = "Your Click to Pay email address";
+		assertEquals(expectedEmailLabel, actualEmailLabel, "Tekst labela ne odgovara!");
+
+		// Popunjavanje polja za Email
+		// WebElement emailInput = driver.findElement(By.cssSelector("#field-email"));
+		WebElement emailInput = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("#field-email")));
+		emailInput.clear();
+		emailInput.sendKeys("kjashd@gmail.com");
+
+		// provera da li postoji poruka o gresci za neispravan email
+		/*
+		 * WebElement emailError =
+		 * driver.findElement(By.cssSelector(".ctp-toggle__email-error"));
+		 * assertNotNull(emailError, "Poruka o gresci nije pronadjena!"); String
+		 * actualError = emailError.getText(); String expectedError =
+		 * "Invalid email address."; assertEquals(actualError, expectedError,
+		 * "Poruka o grešci nije tačna!");
+		 */
+
+		// Provera da li dugme "Continue to checkout" postoji
+		// WebElement checkoutButton =
+		// driver.findElement(By.cssSelector("a.cart_checkout-button"));
+		WebElement checkoutButton = wait
+				.until(ExpectedConditions.elementToBeClickable(By.cssSelector("a.cart_checkout-button")));
+		assertNotNull(checkoutButton, "Dugme za Checkout nije pronađeno!");
+		checkoutButton.click();
+
+		// vratiti se nazad na Section
+		// WebElement logoMyStore =
+		// driver.findElement(By.xpath("/html/body/div[1]/header/div/a"));
+		WebElement logoMyStore = wait
+				.until(ExpectedConditions.elementToBeClickable(By.xpath("/html/body/div[1]/header/div/a")));
+		logoMyStore.click();
+
+	}
+
+}
