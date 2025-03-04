@@ -1,0 +1,210 @@
+package portfolioZaCv;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+
+import java.time.Duration;
+import java.util.List;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
+import org.testng.asserts.SoftAssert;
+
+public class magentoExplicitWait {
+	WebDriver driver;
+	WebDriverWait wait;
+
+	@BeforeTest
+	public void initalization() {
+		driver = new ChromeDriver();
+		driver.manage().window().maximize();
+		driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+		wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+	}
+
+	@AfterTest
+	public void closeDriver() {
+		driver.quit();
+	}
+
+	@BeforeMethod
+	public void navigation() {
+		driver.navigate().to("https://magento.softwaretestingboard.com/");
+	}
+
+	@Test
+	// kliknuti link na sliku
+	// sacekati da element bude klikabilan
+	public void verifyNewLunaYogaCollection() {
+		WebElement element = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".blocks-promo > a")));
+		element.click();
+
+		// verifikovati naslov h1
+		// proveriti da je naslov vidljiv
+		WebElement mainTitle = wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("h1")));
+		// da je naslov aktualan
+		String actualMainTitle = mainTitle.getText();
+		// ocekivani naslov
+		String expectedMainTitle = "New Luma Yoga Collection";
+		// verifikovati da se naslov poklapa
+		assertTrue(actualMainTitle.equals(expectedMainTitle), "Nije Dobar naslov!!!");
+
+		// Verifikovati web sajt
+		wait.until(ExpectedConditions.urlToBe("https://magento.softwaretestingboard.com/collections/yoga-new.html"));
+		// da je Url aktualan
+		String actualUrl = driver.getCurrentUrl();
+		// ocekivani url
+		String expectedUrl = "https://magento.softwaretestingboard.com/collections/yoga-new.html";
+		// verifikovati da se Url poklapa
+		assertTrue(actualUrl.equals(expectedUrl), "Nije dobar url");
+
+		// Verifikovati da je tekst ne postojeci
+		// wait.until(ExpectedConditions.titleIs("404 Not Found"));
+		// da je tekst aktuelan
+		// String actualTextTitle = driver.getTitle();
+		// definise ocekivani tekst
+		// String expectedTextTitle = "404 Not Found";
+		// verifikovan je da je tekst ne postojeci
+		// assertFalse(actualTextTitle.equals(expectedTextTitle), "Nepostoji takav
+		// tekst");
+
+		// Izvlacimo tekst pre klika
+		WebElement firstProduct = driver.findElement(By.cssSelector(".product-items li:nth-child(1)"));
+
+		// cekamo da naziv proivoda bude vidljiv
+		WebElement productName = wait
+				.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".product-item-name")));
+		String textBeforeClick = productName.getText();
+
+		// kliknuti na proizvod
+		firstProduct.click();
+
+		// nalazi se na drugoj stranici ciji je naslov naziv tog proizvoda
+		WebElement productTitleOnNewPage = wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("h1")));
+
+		// naziv nakon klika jednak naziv pre klika
+		String textAfterClick = productTitleOnNewPage.getText();
+
+		assertEquals(textAfterClick, textBeforeClick);
+
+		// sacekati da produkt lista bude vidljiva
+		wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.cssSelector(".products-grid li")));
+
+		// pronaci sve elemente u listi
+		List<WebElement> allProducts = driver.findElements(By.cssSelector(".products-grid li"));
+
+		// kliknuti prvi element
+		allProducts.get(0).click();
+
+		// verifikovati sve brojeve stranice proizvoda
+		int actualNumber = allProducts.size();
+		int expectedNumber = 4;
+		assertEquals(actualNumber, expectedNumber);
+	}
+
+	@Test
+	public void verifyListNewLunaYogaCollection() {
+		// Kliknuti link na sliku
+		driver.findElement(By.cssSelector(".blocks-promo > a")).click();
+
+		// Sacekati da mreza proizvoda ucita
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+		wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".products-grid li")));
+
+		// Dobijeno sve proizvode u listi
+		List<WebElement> allProducts = driver.findElements(By.cssSelector(".products-grid li"));
+
+		// verifikovati sve slike i da su vidljive
+		for (WebElement oneProduct : allProducts) {
+			WebElement image = oneProduct.findElement(By.tagName("img"));
+
+			// slika da bude vidljiva
+			wait.until(ExpectedConditions.visibilityOf(image));
+
+			// slika vidljiva
+			assertTrue(image.isDisplayed());
+		}
+	}
+
+	@Test
+	public void verifyListNewLunaYogaCollectionSoftAssert() {
+		driver.findElement(By.cssSelector(".blocks-promo > a")).click();
+
+		// instalirati SoftAssert i WebDriverWait
+		SoftAssert softAssert = new SoftAssert();
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+		// Sacekati da se proizvod ucita
+		wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".products-grid li")));
+
+		// dobijamo sve proizvode u listi
+		List<WebElement> allProducts = driver.findElements(By.cssSelector(".products-grid li"));
+		int counter = 1;
+
+		// Pregledati sve proizvode i proveriti njihove elemente
+		for (WebElement oneProduct : allProducts) {
+			// Sacekati da se proizvod slika prikaze u vidljivost
+			WebElement image = wait.until(ExpectedConditions.visibilityOf(oneProduct.findElement(By.tagName("img"))));
+			softAssert.assertTrue(image.isDisplayed(), "Slika nije vidljiva u sklopu " + counter + ". proizvoda.");
+
+			// Sacekati da se proizvod naziv prikaze u vidljivost
+			WebElement productName = wait.until(
+					ExpectedConditions.visibilityOf(oneProduct.findElement(By.cssSelector(".product-item-name"))));
+			softAssert.assertTrue(productName.isDisplayed(),
+					"Naziv proizvoda nije vidljiv za " + counter + ". proizvod.");
+
+			// Sacekati da se proizvod cena prikaze u vidljivost
+			WebElement productPrice = wait
+					.until(ExpectedConditions.visibilityOf(oneProduct.findElement(By.cssSelector(".price"))));
+			softAssert.assertTrue(productPrice.isDisplayed(), "Cena nije vidljiva za " + counter + ". proizvod.");
+
+			counter++;
+		}
+		// kraj
+		softAssert.assertAll();
+	}
+
+	@Test
+	public void verifyHoverAddToCartNewLunaYogaCollectionSoftAssert() {
+		// Klik na promo link
+		driver.findElement(By.cssSelector(".blocks-promo > a")).click();
+
+		// Kreiranje WebDriverWait instance
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+		// Čekanje da se učita lista proizvoda
+		wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".products-grid li")));
+
+		// Dohvatanje svih "Add to Cart" dugmića
+		List<WebElement> allButtons = driver.findElements(By.cssSelector(".action.tocart.primary span"));
+
+		// Provera da lista dugmića nije prazna
+		// assertFalse("Nema 'Add to Cart' dugmića na stranici.", allButtons.isEmpty());
+
+		// Dohvatanje prvog dugmeta
+		WebElement firstButton = allButtons.get(0);
+
+		// Verifikacija da dugme nije vidljivo
+		assertFalse(firstButton.isDisplayed());
+
+		// Hover-ovanje direktno nad dugmetom
+		Actions actions = new Actions(driver);
+		actions.moveToElement(firstButton).perform();
+
+		// Čekanje da dugme postane vidljivo nakon hover-a
+		wait.until(ExpectedConditions.visibilityOf(firstButton));
+
+		// Verifikacija da je dugme sada vidljivo
+		assertTrue(firstButton.isDisplayed());
+	}
+}
