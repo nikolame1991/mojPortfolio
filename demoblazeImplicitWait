@@ -1,0 +1,171 @@
+package vezbaa;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
+import java.time.Duration;
+import java.util.List;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
+import org.testng.asserts.SoftAssert;
+
+public class demoblazeImplicitWait {
+	WebDriver driver;
+	WebDriverWait wait;
+
+	@BeforeTest
+	public void initalization() {
+		driver = new ChromeDriver();
+		driver.manage().window().maximize();
+		driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+		wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+	}
+
+	@AfterTest
+	public void closeDriver() {
+		driver.quit();
+	}
+
+	@BeforeMethod
+	public void navigation() {
+		driver.navigate().to("https://www.demoblaze.com/index.html#carouselExampleIndicators");
+	}
+
+	@Test
+	public void clickFirstSectionNav() {
+		WebElement clickNavIcon = driver.findElement(By.cssSelector("nav > a"));
+		clickNavIcon.click();
+	}
+
+	@Test
+	public void clickLinkInSelect() {
+		WebElement clickImg = driver.findElement(By.linkText("Samsung galaxy s6"));
+		clickImg.click();
+
+		// provera URL
+		String actualUrl = driver.getCurrentUrl();
+		String expectedUrl = "https://www.demoblaze.com/prod.html?idp_=1";
+		assertEquals(actualUrl, expectedUrl, "URL se ne poklapa sa očekivanim!");
+
+		// provera Naslova
+		WebElement mainTitle = driver.findElement(By.tagName("h2"));
+
+		String actualMainTitle = mainTitle.getText();
+		String expectedMainTitle = "Samsung galaxy s6";
+		assertEquals(actualMainTitle, expectedMainTitle, "Naslov se ne poklapa");
+
+		// Provera mali naslov "$360"
+		WebElement mainTitleH3 = driver.findElement(By.xpath("//*[@id=\"tbodyid\"]/h3"));
+		String actualTitleH3 = mainTitleH3.getText();
+		// String expectedTitleH3 = "$360 *includes tax";
+		// assertEquals(actualTitleH3, expectedTitleH3, "Podnaslov cena se ne poklapa");
+		assertTrue(actualTitleH3.contains("$360"), "Podnaslov cena se ne poklapa");
+
+		// provera "Product description"
+		WebElement smallMainTitle = driver.findElement(By.xpath("//*[@id=\"more-information\"]/strong"));
+		String actualSmallMainTitle = smallMainTitle.getText();
+		String expectedSmallMainTitle = "Product description";
+		assertEquals(actualSmallMainTitle, expectedSmallMainTitle, "Mali naslov se ne poklapa");
+
+		// provera Teksta
+		WebElement textParagraph = driver.findElement(By.xpath("//*[@id=\"more-information\"]/p"));
+		String actualText = textParagraph.getText();
+		String expectedText = "1.5GHz octa-core";
+		assertTrue(actualText.contains(expectedText), "Tekst opisa ne sadrži očekivanu vrednost!");
+
+		// proveriti da li je Horizontalna linija vidljiva
+		WebElement hrElement = driver.findElement(By.tagName("hr"));
+		assertTrue(hrElement.isDisplayed(), "Horizontalna linija nije vidljiva!");
+
+		// kliknuti dugme
+		WebElement clickButtonAddToCart = driver.findElement(By.cssSelector("[onclick=\"addToCart(1)\"]"));
+		clickButtonAddToCart.click();
+
+		// provera da li je slika vidljiva
+		WebElement imgElement = driver.findElement(By.tagName("img"));
+		assertTrue(imgElement.isDisplayed(), "Slika nije vidljiva");
+
+	}
+
+	// pronalazenje carousel element
+	@Test
+	public void carouselImages() {
+		WebElement carousel = driver.findElement(By.id("carouselExampleIndicators"));
+
+		// proveravamo da li je "carousel" vidljiv
+		if (carousel.isDisplayed()) {
+			assertTrue(carousel.isDisplayed(), "Carousel je uspesno pronadje i vidljiv");
+		} else {
+			assertTrue(carousel.isEnabled(), "Carousel nije pronadjen ili nije vidljiv.");
+		}
+	}
+
+	@Test
+	public void clickFirstProduct() {
+		// sakupljam u listu sve elemente koji odgovaraju isto selektoru
+		List<WebElement> allProducts = driver.findElements(By.cssSelector("#tbodyid .col-lg-4"));
+		allProducts.getFirst().click();
+	}
+
+	@Test
+	public void verifyNumberOfProducts() {
+		// prebrojavamo elemente u listi
+		List<WebElement> allProducts = driver.findElements(By.cssSelector("#tbodyid .col-lg-4"));
+		int actualNumber = allProducts.size();
+		int expectedNumber = 9;
+
+		assertEquals(actualNumber, expectedNumber);
+	}
+
+	@Test
+	public void verifyContentOfProductsImg() {
+		// List<WebElement> allProducts = driver.findElements(By.cssSelector("#tbodyid
+		// .col-lg-4"));
+		List<WebElement> allProducts = wait
+				.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.cssSelector("#tbodyid .col-lg-4")));
+		// iste komande izvrsavamo nad svim elementima
+		for (WebElement oneProduct : allProducts) {
+			// posmatramo sliku
+			WebElement image = oneProduct.findElement(By.tagName("img"));
+			// potvrda da je slika vidljiva
+			assertTrue(image.isDisplayed());
+		}
+	}
+
+	@Test
+	public void verifyContentOfProductss() {
+		SoftAssert softAssert = new SoftAssert();
+		List<WebElement> allProducts = driver.findElements(By.cssSelector("#tbodyid .col-lg-4"));
+		// pocinje od 1.proizvoda
+		int counter = 1;
+
+		for (WebElement oneProduct : allProducts) {
+			// posmatrase slike
+			WebElement image = oneProduct.findElement(By.tagName("img"));
+
+			softAssert.assertTrue(image.isDisplayed(), "Slika nije vidljiva u sklopu " + counter + ". proizvoda.");
+
+			// verifikovati da je naslov vidljiv
+			WebElement productName = oneProduct.findElement(By.cssSelector(".hrefch"));
+			softAssert.assertTrue(productName.isDisplayed(),
+					"Naziv proizvoda nije vidljiv u sklopu " + counter + ".proizvoda.");
+
+			// verifikovati da je cena vidljiv
+			WebElement productPrice = oneProduct.findElement(By.cssSelector(".card-block > h5"));
+			softAssert.assertTrue(productPrice.isDisplayed(),
+					"Cena proizvoda nije vidljiva u sklopu " + counter + ". proizvoda.");
+
+			counter++;
+		}
+		softAssert.assertAll();
+	}
+}
