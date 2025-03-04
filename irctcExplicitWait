@@ -1,0 +1,112 @@
+package vezbaa;
+
+import static org.testng.Assert.assertEquals;
+
+import java.time.Duration;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
+
+public class irctcExplicitWait {
+	WebDriver driver;
+	WebDriverWait wait;
+
+	@BeforeTest
+	public void initalization() {
+		driver = new ChromeDriver();
+		driver.manage().window().maximize();
+		driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+		wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+	}
+
+	@AfterTest
+	public void closeDriver() {
+		driver.quit();
+	}
+
+	@BeforeMethod
+	public void navigaiton() {
+		driver.navigate().to("https://www.irctc.co.in/nget/train-search");
+	}
+
+	@Test
+	public void testIRCTC() {
+
+		// u praznom polju "From" uneti odakle krece i proveriti da li je vidljiv
+		WebElement departureField = wait
+				.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@id=\"origin\"]/span/input")));
+		departureField.clear();
+		departureField.sendKeys("New Delhi");
+		assertEquals("New Delhi", departureField.getAttribute("value"), "Polje 'From' NIJE ispravno popunjeno!");
+
+		// u praznom polju "To" uneti dokle ide i proveriti da li je vidljiv
+		WebElement arrivalField = wait
+				.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@id=\"destination\"]/span/input")));
+		arrivalField.clear();
+		arrivalField.sendKeys("Mumbai Central");
+		assertEquals("Mumbai Central", arrivalField.getAttribute("value"), "Polje 'To' NIJE ispravno popunjeno!");
+
+		// u praznom polju "DD/MM/YYYY" uneti kojim datumom da se putuje
+		WebElement dateField = wait
+				.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@id=\"jDate\"]/span/input")));
+		dateField.clear();
+		dateField.sendKeys("15-02-2025");
+		// assertEquals("15-02-2025", dateField.getAttribute("value"), "Polje 'Journey
+		// Date' NIJE ispravno popunjeno!");
+
+		// DropDown nije standardni "<select>" element, vec custom dropdown, otvorimo
+		// dropdown klikom
+		WebElement quotaDropDown = wait
+				.until(ExpectedConditions.elementToBeClickable(By.xpath("//*[@id=\"journeyQuota\"]")));
+		quotaDropDown.click();
+		// onda se otvara padajuci meni i kliknemo na opciju "GENERAL"
+		WebElement generalOption = wait.until(ExpectedConditions.elementToBeClickable(
+				By.xpath("//*[@id=\"journeyQuota\"]/div/div[4]/div/ul/p-dropdownitem[1]/li/span")));
+		generalOption.click();
+		// verifikovati da li je "GENERAL" pravilno selektovana
+		WebElement selectedQuota = wait.until(ExpectedConditions.presenceOfElementLocated(
+				By.xpath("//*[@id=\"journeyQuota\"]/div/div[4]/div/ul/p-dropdownitem[1]/li/span")));
+		assertEquals("GENERAL", selectedQuota.getText(), "Dropdown 'Quota' NIJE ispravno popunjen!");
+
+		// Kliknemo na dropdown da ga otvorimo
+		WebElement classDropDown = wait
+				.until(ExpectedConditions.elementToBeClickable(By.xpath("//*[@id=\"journeyClass\"]")));
+		classDropDown.click();
+		// Kliknemo na opciju "AC First Class (1A)"
+		WebElement firstClassOption = wait.until(ExpectedConditions
+				.elementToBeClickable(By.xpath("//*[@id=\"journeyClass\"]/div/div[4]/div/ul/p-dropdownitem[3]")));
+		firstClassOption.click();
+		// Proveravamo da li je opcija ispravno slektovana
+		WebElement selectedClass = wait.until(ExpectedConditions
+				.presenceOfElementLocated(By.xpath("//*[@id=\"journeyClass\"]/div/div[4]/div/ul/p-dropdownitem[3]")));
+		assertEquals("AC First Class (1A)", selectedClass.getText(), "Dropdown 'Class' NIJE ispravno popunjen!");
+
+		// kliknuti dugme na "Search" kada se popune sva prazna polja
+		WebElement searchButton = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(
+				"//*[@id=\"divMain\"]/div/app-main-page/div/div/div[1]/div[1]/div[1]/app-jp-input/div/form/div[5]/div[1]")));
+		searchButton.click();
+
+	}
+
+	@Test
+	public void testSelectTrainAndBook() {
+		// Klik na "AC 3 Tier (3A)"
+		WebElement ac3Tier = wait
+				.until(ExpectedConditions.elementToBeClickable(By.xpath("//*[@id=\"divMain\"]/div/app-train-list/div[4]/div/div[5]/div[3]/div[1]/app-train-avl-enq/div[1]/div[5]/div[1]/table/tr/td[1]/div")));
+		ac3Tier.click();
+
+		// Klik na "Book Now" dugme
+		WebElement bookNow = wait
+				.until(ExpectedConditions.elementToBeClickable(By.xpath("//*[@id=\"divMain\"]/div/app-train-list/div[4]/div/div[5]/div[3]/div[1]/app-train-avl-enq/div[2]/div/span/span/button[1]")));
+		bookNow.click();
+	}
+
+}
