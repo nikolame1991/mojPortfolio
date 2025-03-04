@@ -1,0 +1,61 @@
+package saucedemo;
+
+import java.time.Duration;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
+
+public class saucedemo {
+
+	WebDriver driver;
+
+	@BeforeTest
+	public void initalization() {
+		driver = new ChromeDriver();
+		driver.manage().window().maximize();
+		driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+	}
+
+	@AfterTest
+	public void clsoeDriver() {
+		driver.quit();
+	}
+
+	@BeforeMethod
+	public void navigation() {
+		driver.navigate().to("https://www.saucedemo.com/");
+	}
+
+	// 1 test case
+	@Test
+	// Username
+	public void inputFieldUserName() {
+		WebElement inputField_Username = driver.findElement(By.cssSelector("[placeholder=\"Username\"]"));
+		inputField_Username.clear();
+		inputField_Username.sendKeys("standard_user");
+	}
+
+	// 2 test case
+	@Test
+	// Password
+	public void inputFieldPassword() {
+		WebElement inputField_Password = driver.findElement(By.cssSelector("[placeholder=\"Password\"]"));
+		inputField_Password.clear();
+		inputField_Password.sendKeys("secret_sauce");
+	}
+
+	// 3 test case
+	@Test
+	// Login Button
+	public void clickLoginButton() {
+		WebElement buttonLoginClick = driver.findElement(By.cssSelector(".submit-button.btn_action"));
+		buttonLoginClick.click();
+	}
+
+}
