@@ -1,0 +1,175 @@
+package vezbaa;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
+import java.time.Duration;
+import java.util.List;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
+import org.testng.asserts.SoftAssert;
+
+public class demoblazeExplicitWait {
+	WebDriver driver;
+	WebDriverWait wait;
+
+	@BeforeTest
+	public void initalization() {
+		driver = new ChromeDriver();
+		driver.manage().window().maximize();
+		wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+	}
+
+	@AfterTest
+	public void closeDriver() {
+		driver.quit();
+	}
+
+	@BeforeMethod
+	public void navigation() {
+		driver.navigate().to("https://www.demoblaze.com/index.html#carouselExampleIndicators");
+	}
+
+	@Test
+	public void clickFirstSectionNav() {
+		WebElement clickNavIcon = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("nav > a")));
+		clickNavIcon.click();
+	}
+
+	@Test
+	public void clickLinkInSection() {
+		WebElement clickImg = wait.until(ExpectedConditions.elementToBeClickable(By.linkText("Samsung galaxy s6")));
+		clickImg.click();
+
+		// provera URL
+		String actualUrl = driver.getCurrentUrl();
+		String expectedUrl = "https://www.demoblaze.com/prod.html?idp_=1";
+		assertEquals(actualUrl, expectedUrl, "URL se ne poklapa sa očekivanim!");
+
+		// provera da li je slika vidljiva
+		WebElement imgElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("img")));
+		assertTrue(imgElement.isDisplayed(), "Slika nije vidlljiva");
+
+		// provera Naslova
+		WebElement mainTitle = wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("h2")));
+		String actualMainTitle = mainTitle.getText();
+		String expectedMainTitle = "Samsung galaxy s6";
+		assertEquals(actualMainTitle, expectedMainTitle, "Naslov se ne poklapa");
+
+		// Provera mali naslov "360"
+		WebElement mainTitleH3 = wait
+				.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id=\"tbodyid\"]/h3")));
+		String actualTitleH3 = mainTitleH3.getText();
+		assertTrue(actualTitleH3.contains("$360"), "Podnaslov cena se ne poklapa");
+
+		// Provera "Product description"
+		WebElement smallMainText = wait
+				.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id=\"more-information\"]/strong")));
+		String actualSmallMainText = smallMainText.getText();
+		String expectedSmallMainText = "Product description";
+		assertEquals(actualSmallMainText, expectedSmallMainText, "Mali naslov se ne poklapa");
+
+		// Provera teksta
+		WebElement textParagraph = wait
+				.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id=\"more-information\"]/p")));
+		String actualTextParagraph = textParagraph.getText();
+		String expectedTextParagraph = "1.5GHz octa-core";
+		assertTrue(actualTextParagraph.contains(expectedTextParagraph), "Tekst opisa ne sadrži očekivanu vrednost!");
+
+		// proveriti da li je Horizontalna linija vidljiva
+		WebElement hrElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("hr")));
+		assertTrue(hrElement.isDisplayed(), "Horizontalna linija nije vidljiva");
+
+		// kliknuti dugme
+		WebElement clickButtonAddToCart = wait
+				.until(ExpectedConditions.elementToBeClickable(By.cssSelector("[onclick=\"addToCart(1)\"]")));
+		clickButtonAddToCart.click();
+	}
+
+	@Test
+	public void carouselImages() {
+		// cekamo da se carousel pojavi i bude vidljiv
+		WebElement carousel = wait
+				.until(ExpectedConditions.visibilityOfElementLocated(By.id("carouselExampleIndicators")));
+		// provera da li je carousel vidljiv
+		assertTrue(carousel.isDisplayed(), "Carousel je uspesno pronadjen i vidljiv");
+	}
+
+	@Test
+	public void clickFirstProduct() {
+		// skupljanje u listi sve elementye koji odgovaraju isto selektoru
+		List<WebElement> allProducts = wait
+				.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.cssSelector("#tbodyid .col-lg-4")));
+		// klik na prvi proizvod kada postane klikabilan
+		WebElement firstProduct = wait.until(ExpectedConditions.elementToBeClickable(allProducts.get(0)));
+		firstProduct.click();
+	}
+
+	@Test
+	public void verifyNumberOfProducts() {
+		// prebrojavati elemente u listi
+		// cekamo da svi proizvodi budu prisutni na stranici
+		List<WebElement> allProducts = wait
+				.until(ExpectedConditions.numberOfElementsToBe(By.cssSelector("#tbodyid .col-lg-4"), 9));
+
+		int actualNumber = allProducts.size();
+		int expectedNumber = 9;
+
+		assertEquals(actualNumber, expectedNumber, "Broj proizvoda nije ispravan!");
+
+	}
+
+	@Test
+	public void verifyContentOfProecutsImg() {
+		// cekamo da svi proizvodi budu prisutni na stranici
+		List<WebElement> allProducts = wait
+				.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.cssSelector("#tbodyid .col-lg-4")));
+
+		// Iteriramo kroz proizvode i proveravamo slike
+		for (WebElement oneProduct : allProducts) {
+			WebElement image = wait.until(ExpectedConditions.visibilityOf(oneProduct.findElement(By.tagName("img"))));
+			// Potvrda da je slika vidljiva
+			assertTrue(image.isDisplayed(), "Slika nije vidljiva za jedan od proizvoda.");
+		}
+	}
+
+	@Test
+	public void verifyContentOfProductss() {
+		SoftAssert softAssert = new SoftAssert();
+		// cekamo da svi proizvodi budu prisutni na stranici
+		List<WebElement> allProducts = wait
+				.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.cssSelector("#tbodyid .col-lg-4")));
+
+		int counter = 1;
+
+		for (WebElement oneProduct : allProducts) {
+			// Cekamo da slika postane vidljiva
+			WebElement image = wait.until(ExpectedConditions.visibilityOf(oneProduct.findElement(By.tagName("img"))));
+			softAssert.assertTrue(image.isDisplayed(), "Slika nije vidljiva u sklopu " + counter + ". proizvoda.");
+
+			// Čekamo da naziv proizvoda postane vidljiv
+			WebElement productName = wait
+					.until(ExpectedConditions.visibilityOf(oneProduct.findElement(By.cssSelector(".hrefch"))));
+			softAssert.assertTrue(productName.isDisplayed(),
+					"Naziv proizvoda nije vidljiv u sklopu " + counter + ". proizvoda.");
+
+			// Čekamo da cena proizvoda postane vidljiva
+			WebElement productPrice = wait
+					.until(ExpectedConditions.visibilityOf(oneProduct.findElement(By.cssSelector(".card-block > h5"))));
+			softAssert.assertTrue(productPrice.isDisplayed(),
+					"Cena proizvoda nije vidljiva u sklopu " + counter + ". proizvoda.");
+
+			counter++;
+		}
+		softAssert.assertAll();
+	}
+}
